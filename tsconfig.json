@@ -1,0 +1,34 @@
+{
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "src/vue-shim.d.ts"  
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+  "compilerOptions": {
+    "useDefineForClassFields": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "allowJs": true,
+    "module": "esnext",
+    "target": "esnext",
+    // "strict": true,
+    "jsx": "preserve",
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable",
+      "scripthost"
+    ],
+    "sourceMap": true,
+    "pretty": true
+  }
+}
