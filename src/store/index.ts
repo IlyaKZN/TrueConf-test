@@ -1,26 +1,30 @@
 import { createStore, Store } from 'vuex';
-import { TStore } from '../types';
+import { IStore } from '../types';
+import { InjectionKey } from 'vue';
 
-const store: Store<TStore> = createStore({
+
+export const key: InjectionKey<Store<IStore>> = Symbol()
+
+const store = createStore<IStore>({
   state () {
     return {
       liftsData: {}
     }
   },
   mutations: {
-    setInitialState(state: TStore, initialState: TStore) {
+    setInitialState(state: IStore, initialState: IStore) {
       state.liftsData = initialState.liftsData;
     },
-    dequeueByLiftNumber(state: TStore, liftNumber: number) {
+    dequeueByLiftNumber(state: IStore, liftNumber: number) {
       state.liftsData[liftNumber].queue = state.liftsData[liftNumber].queue.slice(1,state.liftsData[liftNumber].queue.length + 1);
     },
-    setCurrentFloor(state: TStore, { liftNumber, floorNumber }) {
+    setCurrentFloor(state: IStore, { liftNumber, floorNumber }) {
       state.liftsData[liftNumber].currentFloor = floorNumber;
     },
-    pushInQueue(state: TStore, { liftNumber, floorNumber }) {
+    pushInQueue(state: IStore, { liftNumber, floorNumber }) {
       state.liftsData[liftNumber].queue = [...state.liftsData[liftNumber].queue, floorNumber];
     },
-    setLiftState(state: TStore, { liftNumber, liftState }) {
+    setLiftState(state: IStore, { liftNumber, liftState }) {
       state.liftsData[liftNumber].state = liftState;
     }
   },
@@ -42,15 +46,29 @@ const store: Store<TStore> = createStore({
     }
   },
   getters: {
-    queueByLiftNumber: (state: TStore) => (liftNumber) => {
+    queueByLiftNumber: (state: IStore) => (liftNumber: number): number[] => {
       if (state.liftsData[liftNumber]) {
         return state.liftsData[liftNumber].queue;
       } else {
         return [];
       }
     },
-    getLiftsData: (state: TStore) => () => {
-      return state.liftsData;
+    getLiftsData: (state: IStore) => () => {
+      return JSON.parse(JSON.stringify(state.liftsData))
+    },
+    getAllQueues: (state: IStore)=> ():number[][] => {
+      const queues = [];
+      for (let key in state.liftsData) {
+        queues.push([...state.liftsData[key].queue]);
+      }
+      return queues;
+    },
+    getCurrentFloor: (state: IStore) => (liftNumber: number) => {
+      if (state.liftsData[liftNumber]) {
+        return state.liftsData[liftNumber].currentFloor;
+      } else {
+        return [];
+      }
     }
   }
 })

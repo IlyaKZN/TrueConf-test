@@ -1,6 +1,6 @@
 <template>
   <div class="floor">
-    <button class="floorButton" @click="liftCall">
+    <button class="floorButton" @click="liftCall" :disabled="buttonState == 'disabled'">
       <p class="floorNumber">{{ floorNumber }}</p>
     </button>
   </div>
@@ -8,6 +8,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { ILiftsData } from '../types';
 
 export default defineComponent({
   name: 'FloorItem',
@@ -18,35 +19,67 @@ export default defineComponent({
   },
   data() {
     return {
-      liftsData: null,
+      liftsData: {} as ILiftsData,
       buttonState: 'active'
     }
   },
   computed: {
     getLiftsData() {
       return this.$store.getters.getLiftsData();
+    },
+    getAllQueues() {
+      return this.$store.getters.getAllQueues();
     }
   },
   watch: {
-    getLiftsData(newData, oldData) {   
+    getLiftsData(newData, oldData) {
       this.liftsData = newData;
+    },
+    getAllQueues(newData, oldData) {
+      this.checkButtonState(newData);
     }
   },
   methods: {
     liftCall() {
+      for (let key in this.liftsData) {
+        if (this.liftsData[key].currentFloor === this.floorNumber) {
+          return;
+        }
+      }
+      //Ищем ближний свободный лифт
       const nearestLift = {
         numberLift: 0,
-        defferentFloors: 0
+        defferentFloors: 0,
+        queueSize: 0
       };
       for (let key in this.liftsData) {
-        const differentFloors = Math.abs(this.liftsData[key].currentFloor - this.floorNumber)
-        if ((differentFloors < nearestLift.defferentFloors || nearestLift.defferentFloors === 0) 
+        const differentFloors = Math.abs(this.liftsData[key].currentFloor - this.floorNumber!)
+        if ((differentFloors < nearestLift.defferentFloors || nearestLift.defferentFloors === 0)
           && this.liftsData[key].state === 'ready' ) {
           nearestLift.numberLift = +key,
           nearestLift.defferentFloors = differentFloors;
         }
       }
+
+      //Если все лифты заняты, вызываем наименее нагруженный лифт
+      if (nearestLift.numberLift === 0) {
+        for (let key in this.liftsData) {
+          if (this.liftsData[key].queue.length < nearestLift.queueSize || nearestLift.queueSize === 0) {
+            nearestLift.numberLift = +key;
+            nearestLift.queueSize = this.liftsData[key].queue.length;
+          }
+        }
+      }
       this.$store.dispatch('pushInQueue', { liftNumber: nearestLift.numberLift, floorNumber: this.floorNumber});
+    },
+    checkButtonState(queus: number[][]) {
+      let state = 'active';
+      queus.forEach((el) => {
+        if (el.indexOf(this.floorNumber!) > -1) {
+          state = 'disabled';
+        }
+      })
+      this.buttonState = state;
     }
   }
 })
@@ -85,6 +118,11 @@ export default defineComponent({
   left: calc(50% - 5px);
   background-color: rgb(112, 172, 246);
   border-radius: 50%;
+}
+
+.floorButton:disabled {
+  opacity: 0.5;
+  cursor: auto;
 }
 
 .floorNumber {

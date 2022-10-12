@@ -1,8 +1,8 @@
-export type TStore = {
-  liftsData: TLiftsData
+export interface IStore {
+  liftsData: ILiftsData
 }
 
-export type TLiftsData = {
+export interface ILiftsData {
   [key: number]: {
     queue: Array<number>,
     currentFloor: number,

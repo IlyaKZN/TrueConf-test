@@ -21,10 +21,9 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { mapActions } from 'vuex';
 import FloorItem from './components/FloorItem.vue';
 import LiftShaft from './components/LiftShaft.vue';
-import { TStore } from './types/index';
+import { IStore } from './types/index';
 
 export default defineComponent({
   name: 'App',
@@ -34,12 +33,21 @@ export default defineComponent({
   },
   data() {
     return {
-      numberFloors: 8,
+      numberFloors: 7,
       numberLifts: 4,
+      liftsData: {}
     }
   },
   mounted() {
-    const initialState: TStore = { liftsData: {} };
+    let initialState: IStore = { liftsData: {} };
+
+    if (localStorage.liftsData) {
+      initialState.liftsData = JSON.parse(localStorage.liftsData);
+      
+      this.$store.dispatch('setInitialState', initialState);
+      return;
+    }
+
     for(let i = 1; i < this.numberLifts + 1; i++) {
       initialState.liftsData[i] = {
         state: 'ready',
@@ -48,6 +56,25 @@ export default defineComponent({
       };
     }
     this.$store.dispatch('setInitialState', initialState)
+  },
+  computed: {
+    getAllQueues() {
+      return this.$store.getters.getAllQueues();
+    }
+  },
+  watch: {
+    getAllQueues(newData, oldData) {
+      //@ts-ignore
+      this.getLiftsData();
+    },
+    liftsData() {
+      localStorage.liftsData = JSON.stringify(this.liftsData);
+    }
+  },
+  methods: {
+    async getLiftsData() {
+      this.liftsData = await this.$store.getters.getLiftsData();
+    },
   }
 });
 </script>
