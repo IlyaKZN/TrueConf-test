@@ -1,6 +1,6 @@
 <template>
   <div class="floor">
-    <button class="floorButton">
+    <button class="floorButton" @click="liftCall">
       <p class="floorNumber">{{ floorNumber }}</p>
     </button>
   </div>
@@ -8,6 +8,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { TLiftsData } from '../types/index';
 
 export default defineComponent({
   name: 'FloorItem',
@@ -16,6 +17,23 @@ export default defineComponent({
     numberLifts: Number,
     floorNumber: Number
   },
+  methods: {
+    liftCall() {
+      const liftsData: TLiftsData = this.$store.state.liftsData;
+      const nearestLift = {
+        numberLift: 0,
+        defferentFloors: 0
+      };
+      for (let key in liftsData) {
+        const differentFloors = Math.abs(liftsData[key].currentFloor - this.floorNumber)
+        if (differentFloors > nearestLift.defferentFloors) {
+          nearestLift.numberLift = +key,
+          nearestLift.defferentFloors = differentFloors;
+        }
+      }
+      this.$store.dispatch('pushInQueue', { liftNumber: nearestLift.numberLift, floorNumber: this.floorNumber});
+    }
+  }
 })
 </script>
 
@@ -28,7 +46,7 @@ export default defineComponent({
   height: var(--lift-height);
 }
 
-.floor:first-of-type {
+.floor:last-of-type {
   border-top: 1px solid rgb(154, 154, 255);
 }
 

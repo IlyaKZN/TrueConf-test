@@ -10,7 +10,8 @@
   "author": "Ilya Pichugin",
   "license": "ISC",
   "dependencies": {
-    "vue": "^3.2.36"
+    "vue": "^3.2.36",
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.19.3",
