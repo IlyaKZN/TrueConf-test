@@ -18,7 +18,7 @@
     "allowJs": true,
     "module": "esnext",
     "target": "esnext",
-    // "strict": true,
+    "strict": true,
     "jsx": "preserve",
     "moduleResolution": "node",
     "isolatedModules": true,
