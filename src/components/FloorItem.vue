@@ -8,7 +8,6 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { TLiftsData } from '../types/index';
 
 export default defineComponent({
   name: 'FloorItem',
@@ -17,16 +16,32 @@ export default defineComponent({
     numberLifts: Number,
     floorNumber: Number
   },
+  data() {
+    return {
+      liftsData: null,
+      buttonState: 'active'
+    }
+  },
+  computed: {
+    getLiftsData() {
+      return this.$store.getters.getLiftsData();
+    }
+  },
+  watch: {
+    getLiftsData(newData, oldData) {   
+      this.liftsData = newData;
+    }
+  },
   methods: {
     liftCall() {
-      const liftsData: TLiftsData = this.$store.state.liftsData;
       const nearestLift = {
         numberLift: 0,
         defferentFloors: 0
       };
-      for (let key in liftsData) {
-        const differentFloors = Math.abs(liftsData[key].currentFloor - this.floorNumber)
-        if (differentFloors > nearestLift.defferentFloors) {
+      for (let key in this.liftsData) {
+        const differentFloors = Math.abs(this.liftsData[key].currentFloor - this.floorNumber)
+        if ((differentFloors < nearestLift.defferentFloors || nearestLift.defferentFloors === 0) 
+          && this.liftsData[key].state === 'ready' ) {
           nearestLift.numberLift = +key,
           nearestLift.defferentFloors = differentFloors;
         }

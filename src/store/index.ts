@@ -1,4 +1,3 @@
-import { createApp } from 'vue';
 import { createStore, Store } from 'vuex';
 import { TStore } from '../types';
 
@@ -19,7 +18,10 @@ const store: Store<TStore> = createStore({
       state.liftsData[liftNumber].currentFloor = floorNumber;
     },
     pushInQueue(state: TStore, { liftNumber, floorNumber }) {
-      state.liftsData[liftNumber].queue.push(floorNumber);
+      state.liftsData[liftNumber].queue = [...state.liftsData[liftNumber].queue, floorNumber];
+    },
+    setLiftState(state: TStore, { liftNumber, liftState }) {
+      state.liftsData[liftNumber].state = liftState;
     }
   },
   actions: {
@@ -34,15 +36,21 @@ const store: Store<TStore> = createStore({
     },
     pushInQueue(ctx, payload) {
       ctx.commit('pushInQueue', payload);
+    },
+    setLiftState(ctx, payload) {
+      ctx.commit('setLiftState', payload)
     }
   },
   getters: {
     queueByLiftNumber: (state: TStore) => (liftNumber) => {
       if (state.liftsData[liftNumber]) {
-        return state.liftsData[liftNumber].queue
+        return state.liftsData[liftNumber].queue;
       } else {
-        return []
+        return [];
       }
+    },
+    getLiftsData: (state: TStore) => () => {
+      return state.liftsData;
     }
   }
 })
